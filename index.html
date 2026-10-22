@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Embajadores — Naturaleza Abierta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --moss-050:#eef2ea;
+    --moss-900:#1f3323;
+    --moss-700:#2c4a35;
+    --clay:#c68a3e;
+    --clay-deep:#a8712f;
+    --ink:#221f1a;
+    --paper:#f7f5ee;
+    --line:#d8d6c8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--moss-050);
+    color:var(--ink);
+    font-family:'Work Sans',sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:520px; margin:0 auto; padding:44px 22px 64px; }
+  .leaf{ width:38px;height:38px;margin-bottom:20px; }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:2rem;
+    line-height:1.15;
+    margin:0 0 10px;
+    color:var(--moss-900);
+    letter-spacing:-0.01em;
+  }
+  .sub{ color:#5b5648; font-size:1rem; margin:0 0 24px; }
+  .cupos{
+    display:none;
+    background:var(--moss-900);
+    color:#d7e8da;
+    border-radius:4px;
+    padding:10px 14px;
+    font-size:0.9rem;
+    margin-bottom:22px;
+  }
+  .cupos b{ color:#fff; }
+  .reglas{
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-left:4px solid var(--clay);
+    border-radius:4px;
+    padding:18px 18px 8px;
+    margin-bottom:28px;
+  }
+  .reglas h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.2rem;
+    color:var(--moss-900);
+    margin:0 0 12px;
+  }
+  .reglas ul{ list-style:none; margin:0; padding:0; }
+  .reglas li{ font-size:0.93rem; color:var(--moss-700); margin-bottom:12px; padding-left:26px; position:relative; }
+  .reglas li::before{ content:attr(data-i); position:absolute; left:0; top:0; }
+  .reglas b{ color:var(--clay-deep); }
+  .reglas .aviso b{ color:#8a3b2c; }
+  form{ display:flex; flex-direction:column; gap:18px; }
+  .fila{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  @media (max-width:420px){ .fila{ grid-template-columns:1fr; } }
+  .bloque-titulo{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.1rem;
+    color:var(--moss-900);
+    margin:10px 0 -6px;
+    padding-top:14px;
+    border-top:1px solid var(--line);
+  }
+  label{
+    display:block;
+    font-size:0.85rem;
+    color:var(--moss-700);
+    margin-bottom:7px;
+    font-weight:500;
+  }
+  input[type=text], input[type=tel], input[type=email], input[type=password]{
+    width:100%;
+    padding:13px 14px;
+    border:1.5px solid var(--line);
+    border-radius:3px;
+    background:var(--paper);
+    font-family:'Work Sans',sans-serif;
+    font-size:1rem;
+    color:var(--ink);
+    transition:border-color .15s ease;
+  }
+  input:focus{ outline:none; border-color:var(--moss-700); }
+  .opc{ font-weight:400; color:#8a8672; }
+  .nota{ font-size:0.85rem; color:#5b5648; margin:-6px 0 0; }
+  .acepto{ display:flex; gap:10px; align-items:flex-start; background:var(--paper); border:1.5px solid var(--line); border-radius:3px; padding:13px 14px; }
+  .acepto input{ margin-top:4px; width:18px; height:18px; flex:none; accent-color:var(--moss-700); }
+  .acepto span{ font-size:0.9rem; color:var(--moss-700); }
+  .trampa{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  button, .btn-principal{
+    display:block;
+    margin-top:8px;
+    padding:15px 20px;
+    border:none;
+    border-radius:3px;
+    background:var(--moss-700);
+    color:#fff;
+    font-family:'Work Sans',sans-serif;
+    font-size:1rem;
+    font-weight:600;
+    cursor:pointer;
+    text-align:center;
+    text-decoration:none;
+    transition:background .15s ease;
+  }
+  button:hover, .btn-principal:hover{ background:var(--moss-900); }
+  button:disabled{ background:#9aa596; cursor:default; }
+  button.sec{ background:transparent; color:var(--moss-700); border:1.5px solid var(--moss-700); }
+  button.sec:hover{ background:var(--moss-050); }
+  .err{ display:none; color:#8a3b2c; font-size:0.9rem; background:#f6e9e5; border:1px solid #e3c4bb; border-radius:3px; padding:10px 12px; }
+  .state{ display:none; text-align:center; padding-top:20px; }
+  .state.show{ display:block; }
+  form.hide, .reglas.hide, .cupos.hide{ display:none !important; }
+  .check{ width:52px;height:52px;margin:0 auto 18px; }
+  .state h2{
+    font-family:'Fraunces',serif;
+    font-weight:500;
+    font-size:1.55rem;
+    color:var(--moss-900);
+    margin:0 0 8px;
+  }
+  .state p{ color:#5b5648; font-size:0.95rem; }
+  .caja-codigo{
+    background:var(--moss-900);
+    border-radius:6px;
+    padding:22px;
+    margin-top:22px;
+    text-align:left;
+  }
+  .caja-codigo .etiqueta{ color:#a9c2ac; font-size:0.8rem; margin-bottom:4px; }
+  .caja-codigo .codigo{
+    font-family:'Fraunces',serif;
+    color:#fff;
+    font-size:1.8rem;
+    letter-spacing:0.02em;
+    margin-bottom:6px;
+  }
+  .caja-codigo .vigencia{ color:#e8c98f; font-size:0.88rem; margin-bottom:16px; }
+  .caja-codigo a{
+    display:block;
+    color:#d7e8da;
+    font-size:0.88rem;
+    word-break:break-all;
+    margin-bottom:10px;
+    text-decoration:underline;
+  }
+  .aviso-permanente{
+    text-align:left;
+    background:var(--paper);
+    border:1.5px solid var(--line);
+    border-left:4px solid var(--clay);
+    border-radius:4px;
+    padding:14px 16px;
+    margin-top:18px;
+    font-size:0.9rem;
+    color:var(--moss-700);
+  }
+  .activar{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
+  .activar summary{ cursor:pointer; color:var(--moss-700); font-size:0.9rem; font-weight:500; }
+  .activar form{ margin-top:16px; }
+  footer{
+    margin-top:48px;
+    padding-top:20px;
+    border-top:1px solid var(--line);
+    font-size:0.82rem;
+    color:#8a8672;
+  }
+  .ojito-wrap{position:relative;display:block;width:100%}
+  .ojito-wrap>input{padding-right:44px!important}
+  .ojito-btn{position:absolute!important;right:6px;top:50%;transform:translateY(-50%);width:34px!important;height:34px;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer;font-size:17px;line-height:1;opacity:.65;color:inherit}
+  .ojito-btn:hover{opacity:1;background:transparent!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <svg class="leaf" viewBox="0 0 40 40" fill="none">
+    <path d="M20 35C20 35 6 28 6 14C6 10 8 6 12 6C16 6 20 10 20 16C20 10 24 6 28 6C32 6 34 10 34 14C34 28 20 35 20 35Z" stroke="#2c4a35" stroke-width="1.6"/>
+    <path d="M20 35V16" stroke="#2c4a35" stroke-width="1.4"/>
+  </svg>
+
+  <h1>Te damos la bienvenida a Naturaleza Abierta</h1>
+  <p class="sub" id="subP">Deja tus datos para gestionar tu afiliación gratuita como embajador(a) y empezar a compartir nuestros productos.</p>
+
+  <div class="cupos" id="cupos"></div>
+
+  <div class="reglas" id="reglas">
+    <h2>Cómo funciona tu afiliación gratuita</h2>
+    <ul>
+      <li data-i="🌿">Tu código y tu enlace de afiliado son <b>gratis</b> y tienen una validez de <b><span class="dias">60</span> días</b>.</li>
+      <li data-i="✅">La única forma de que se mantengan <b>de forma permanente</b> es que logres <b>por lo menos una venta</b> dentro de ese tiempo. Si la logras, el código es tuyo y todas tus comisiones quedan para ti.</li>
+      <li class="aviso" data-i="⚠️">Si en <span class="dias">60</span> días no logras ninguna venta, <b>el código se elimina</b> y tu cupo pasa a otra persona.</li>
+      <li data-i="💚">Todos pagan el mismo precio, tú también. Tu ganancia es la comisión por las compras que lleguen con tu enlace, según el producto. Las comisiones se pagan los primeros 5 días de cada mes por Pago Móvil.</li>
+    </ul>
+  </div>
+
+  <form id="f" onsubmit="return false" novalidate>
+    <div class="fila">
+      <div>
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" required autocomplete="given-name">
+      </div>
+      <div>
+        <label for="apellido">Apellido</label>
+        <input type="text" id="apellido" required autocomplete="family-name">
+      </div>
+    </div>
+    <div>
+      <label for="telefono">Tu número de WhatsApp</label>
+      <input type="tel" id="telefono" required autocomplete="tel" placeholder="0412 1234567">
+    </div>
+    <div>
+      <label for="cedula">Número de cédula</label>
+      <input type="text" id="cedula" required placeholder="V12345678">
+    </div>
+    <div>
+      <label for="redSocial">Tu red social principal <span class="opc">(opcional)</span></label>
+      <input type="text" id="redSocial" placeholder="@tuusuario en Instagram, TikTok...">
+    </div>
+
+    <div class="bloque-titulo">¿Dónde te pagamos tus comisiones?</div>
+    <div>
+      <label for="banco">Nombre del banco</label>
+      <input type="text" id="banco" required placeholder="Ej: Banesco">
+    </div>
+    <div>
+      <label for="telefonoPago">Teléfono de Pago Móvil</label>
+      <input type="tel" id="telefonoPago" required placeholder="0412 1234567">
+    </div>
+    <p class="nota">Usamos estos datos solo para pagarte tus comisiones cuando tengas ventas.</p>
+
+    <div class="bloque-titulo">Tu acceso al portal de afiliado</div>
+    <div>
+      <label for="correo">Correo electrónico</label>
+      <input type="email" id="correo" required autocomplete="email" placeholder="tucorreo@ejemplo.com">
+    </div>
+    <div>
+      <label for="clave">Crea una contraseña</label>
+      <input type="password" id="clave" required minlength="8" autocomplete="new-password" placeholder="Mínimo 8 caracteres">
+    </div>
+    <div>
+      <label for="clave2">Repite la contraseña</label>
+      <input type="password" id="clave2" required minlength="8" autocomplete="new-password">
+    </div>
+    <p class="nota">Con este correo y contraseña entrarás a tu portal para ver tus ventas, tu red y tus pagos.</p>
+
+    <div class="trampa" aria-hidden="true"><label>No llenar<input type="text" id="web" tabindex="-1" autocomplete="off"></label></div>
+
+    <label class="acepto" for="acepto">
+      <input type="checkbox" id="acepto">
+      <span>Entiendo que mi código es válido por <span class="dias">60</span> días y que solo se mantiene si logro al menos una venta en ese tiempo.</span>
+    </label>
+
+    <p class="err" id="err"></p>
+    <button type="submit" id="btn">Quiero mi afiliación gratuita</button>
+  </form>
+
+  <div class="state" id="ok">
+    <svg class="check" viewBox="0 0 52 52" fill="none">
+      <circle cx="26" cy="26" r="24" stroke="#2c4a35" stroke-width="1.6"/>
+      <path d="M16 27l7 7 14-15" stroke="#2c4a35" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <h2>¡Bienvenido(a), embajador(a)!</h2>
+    <p>Tu afiliación gratuita ya está activa. Guarda estos datos.</p>
+
+    <div class="caja-codigo">
+      <div class="etiqueta">Tu código</div>
+      <div class="codigo" id="codigoTexto">NA-00000</div>
+      <div class="vigencia" id="vigenciaTexto"></div>
+      <a id="linkCatalogo" href="#" target="_blank" rel="noopener">🔗 Tu catálogo para compartir</a>
+      <a id="linkCreativos" href="#" target="_blank" rel="noopener">🎨 Tus creativos listos</a>
+      <a id="linkPortal" href="#" target="_blank" rel="noopener">🔐 Tu portal de afiliado</a>
+    </div>
+    <button type="button" class="sec" id="btnCopiar">Copiar mi enlace de catálogo</button>
+
+    <div class="aviso-permanente">
+      <b>Recuerda:</b> logra al menos una venta antes de esa fecha y tu código será tuyo de forma permanente. Si no, se elimina y el cupo pasa a otra persona.
+    </div>
+    <p id="notaAcceso" style="margin-top:18px"></p>
+  </div>
+
+  <div class="state" id="sinCupos">
+    <h2>Los cupos gratuitos se agotaron</h2>
+    <p>Por ahora ya no quedan cupos de afiliación gratuita. Si quieres afiliarte, puedes hacerlo comprando cualquiera de nuestros productos y recibirás tu código al instante. Escríbenos a nuestro WhatsApp.</p>
+  </div>
+
+  <div class="state" id="yaRegistrado">
+    <h2>Ya tienes un registro con estos datos</h2>
+    <p id="yaRegistradoTexto">Ese número, cédula o correo ya está registrado. Entra a tu portal de afiliado para ver tu código.</p>
+    <a class="btn-principal" id="btnPortalYa" href="https://portal.naturalezaabierta.com/" target="_blank" rel="noopener">Ir a mi portal</a>
+  </div>
+
+  <details class="activar" id="activar">
+    <summary>¿Ya te registraste y confirmaste tu correo? Activa tu acceso</summary>
+    <form id="fAct" onsubmit="return false" novalidate>
+      <div>
+        <label for="aTel">Tu número de WhatsApp</label>
+        <input type="tel" id="aTel" autocomplete="tel">
+      </div>
+      <div>
+        <label for="aCorreo">Correo con el que te registraste</label>
+        <input type="email" id="aCorreo" autocomplete="email">
+      </div>
+      <div>
+        <label for="aClave">Contraseña</label>
+        <input type="password" id="aClave" autocomplete="current-password">
+      </div>
+      <p class="err" id="errAct"></p>
+      <p class="nota" id="okAct" style="display:none;color:#2c4a35"></p>
+      <button type="submit" id="btnAct" class="sec">Activar mi acceso</button>
+    </form>
+  </details>
+
+  <footer>Naturaleza Abierta</footer>
+</div>
+
+<script>
+  // ---- Cliente mínimo a Supabase (fetch directo al REST/RPC) ----
+  const SUPABASE_URL = "https://tgvcvnhrwswuxgjbpvwq.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_EKV8OM1y96u-DV_kUPGwkg_BZuGdf4D";
+  const URL_PORTAL = "https://portal.naturalezaabierta.com/";
+  const STORAGE_KEY = "embajador_registrado_v1";
+
+  async function rpc(fn, params, token){
+    try{
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: "POST",
+        headers: Object.assign({ "Content-Type": "application/json", "apikey": SUPABASE_KEY }, token ? { "Authorization": "Bearer " + token } : {}),
+        body: JSON.stringify(params || {})
+      });
+      let data = null;
+      try{ data = await res.json(); }catch(_){ data = null; }
+      if(!res.ok) return { data: null, error: { message: (data && (data.message || data.error)) || `HTTP ${res.status}` } };
+      return { data, error: null };
+    }catch(ex){
+      return { data: null, error: { message: ex.message || "fallo de red" } };
+    }
+  }
+
+  async function authFetch(path, body){
+    try{
+      const r = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY },
+        body: JSON.stringify(body)
+      });
+      return { ok: r.ok, j: await r.json().catch(() => ({})) };
+    }catch(_){ return { ok: false, j: {} }; }
+  }
+
+  // Crea la cuenta; si el correo ya existe, intenta entrar con la misma contraseña.
+  // Devuelve { token } si hay sesión, { pendiente:true } si falta confirmar el correo, o { error }.
+  async function obtenerSesion(email, password){
+    let r = await authFetch("signup", { email, password });
+    if(r.ok && r.j.access_token) return { token: r.j.access_token };
+    if(r.ok) return { pendiente: true };
+    const ya = r.j.error_code === "user_already_exists" || /already/i.test(r.j.msg || r.j.message || "");
+    if(ya){
+      r = await authFetch("token?grant_type=password", { email, password });
+      if(r.ok && r.j.access_token) return { token: r.j.access_token };
+      return { error: "Ese correo ya tiene una cuenta con otra contraseña." };
+    }
+    return { error: (r.j.msg || r.j.message || "No pudimos crear tu acceso.") };
+  }
+
+  const MENSAJES = {
+    datos_invalidos: "Revisa tu nombre y apellido.",
+    telefono_invalido: "Revisa tu número de WhatsApp (ej: 0412 1234567).",
+    cedula_invalida: "Revisa tu número de cédula.",
+    correo_invalido: "Revisa tu correo electrónico.",
+    datos_pago_invalidos: "Revisa el banco y el teléfono de Pago Móvil.",
+    intenta_mas_tarde: "Hay muchas solicitudes en este momento. Inténtalo de nuevo en un rato.",
+    ya_vencido: "Tu afiliación gratuita anterior ya venció. Para afiliarte ahora puedes comprar cualquiera de nuestros productos y recibirás tu código.",
+    sin_codigo: "No pudimos generar tu código. Escríbenos por WhatsApp para ayudarte."
+  };
+
+  const form = document.getElementById("f");
+  const err = document.getElementById("err");
+  const btn = document.getElementById("btn");
+  const tCarga = Date.now();
+
+  function mostrar(id){
+    ["ok","sinCupos","yaRegistrado"].forEach(s => document.getElementById(s).classList.remove("show"));
+    if(id) document.getElementById(id).classList.add("show");
+  }
+  function ocultarFormulario(){
+    form.classList.add("hide");
+    document.getElementById("reglas").classList.add("hide");
+    document.getElementById("cupos").classList.add("hide");
+  }
+  function fallo(msg){
+    err.textContent = msg;
+    err.style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Quiero mi afiliación gratuita";
+  }
+  function fechaLarga(iso){
+    try{ return new Date(iso).toLocaleDateString("es-VE", { day: "numeric", month: "long", year: "numeric" }); }
+    catch(_){ return ""; }
+  }
+
+  function mostrarExito(d){
+    ocultarFormulario();
+    document.getElementById("subP").style.display = "none";
+    document.getElementById("codigoTexto").textContent = d.codigo_propio;
+    document.getElementById("vigenciaTexto").textContent = "Válido hasta el " + fechaLarga(d.vence_en) + " (" + d.dias + " días)";
+    document.getElementById("linkCatalogo").href = d.link_catalogo;
+    document.getElementById("linkCatalogo").textContent = "🔗 Tu catálogo: " + d.link_catalogo;
+    document.getElementById("linkCreativos").href = d.link_creativos;
+    document.getElementById("linkPortal").href = URL_PORTAL;
+    const nota = document.getElementById("notaAcceso");
+    if(d.acceso === "ok") nota.textContent = "Entra a tu portal con " + d.correo + " y la contraseña que acabas de crear.";
+    else if(d.acceso === "pendiente") nota.textContent = "Te enviamos un correo para confirmar tu cuenta. Confírmalo y vuelve a esta página para activar tu acceso al portal (abajo).";
+    else nota.textContent = "Tu código ya está activo. Para entrar a tu portal, usa «Activa tu acceso» al final de esta página.";
+    document.getElementById("btnCopiar").onclick = async () => {
+      try{ await navigator.clipboard.writeText(d.link_catalogo); document.getElementById("btnCopiar").textContent = "¡Copiado!"; }
+      catch(_){ window.prompt("Copia tu enlace:", d.link_catalogo); }
+    };
+    mostrar("ok");
+  }
+
+  // ---- Estado inicial: cupos y registro previo en este navegador ----
+  (async function init(){
+    try{
+      const g = localStorage.getItem(STORAGE_KEY);
+      if(g){ mostrarExito(JSON.parse(g)); return; }
+    }catch(_){}
+    const { data } = await rpc("fn_embajadores_cupos", {});
+    if(data){
+      document.querySelectorAll(".dias").forEach(e => e.textContent = data.dias);
+      const c = document.getElementById("cupos");
+      if(data.disponibles <= 0){
+        ocultarFormulario();
+        mostrar("sinCupos");
+      }else{
+        c.innerHTML = "Quedan <b>" + data.disponibles + "</b> cupos gratuitos de " + data.cupos;
+        c.style.display = "block";
+      }
+    }
+  })();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    err.style.display = "none";
+
+    if(document.getElementById("web").value) { fallo("No pudimos enviar tus datos. Inténtalo de nuevo."); return; }
+    if(Date.now() - tCarga < 4000){ fallo("Revisa tus datos y vuelve a presionar el botón."); return; }
+
+    const v = id => document.getElementById(id).value.trim();
+    const nombre = v("nombre"), apellido = v("apellido"), telefono = v("telefono"), cedula = v("cedula");
+    const banco = v("banco"), telefonoPago = v("telefonoPago"), correo = v("correo").toLowerCase();
+    const clave = document.getElementById("clave").value;
+
+    if(!nombre || !apellido || !telefono || !cedula || !banco || !telefonoPago || !correo || !clave){ fallo("Completa todos los campos obligatorios."); return; }
+    if(clave.length < 8){ fallo("La contraseña debe tener mínimo 8 caracteres."); return; }
+    if(clave !== document.getElementById("clave2").value){ fallo("Las contraseñas no coinciden."); return; }
+    if(!document.getElementById("acepto").checked){ fallo("Marca la casilla para confirmar que entendiste las condiciones de los 60 días."); return; }
+
+    btn.disabled = true;
+    btn.textContent = "Registrando...";
+
+    const { data, error } = await rpc("fn_registrar_embajador", {
+      p_nombre: nombre, p_apellido: apellido, p_telefono: telefono, p_cedula: cedula, p_correo: correo,
+      p_banco: banco, p_telefono_pago: telefonoPago, p_red_social: v("redSocial") || null
+    });
+
+    if(error || !data){ fallo("No pudimos guardar tus datos. Inténtalo de nuevo."); return; }
+    if(data.ok === false){
+      const c = data.error;
+      if(c === "sin_cupos"){ ocultarFormulario(); mostrar("sinCupos"); return; }
+      if(c === "ya_registrado" || c === "ya_afiliado"){
+        ocultarFormulario();
+        document.getElementById("yaRegistradoTexto").textContent = c === "ya_afiliado"
+          ? "Ese número ya tiene un código de afiliado. Entra a tu portal para verlo."
+          : "Ese número, cédula o correo ya está registrado como embajador. Entra a tu portal para ver tu código; si no tienes acceso, actívalo abajo.";
+        mostrar("yaRegistrado");
+        return;
+      }
+      fallo(MENSAJES[c] || "No pudimos guardar tus datos. Inténtalo de nuevo.");
+      return;
+    }
+
+    // Registro hecho: ahora la cuenta de acceso al portal
+    let acceso = "error";
+    const ses = await obtenerSesion(correo, clave);
+    if(ses.token){
+      const vin = await rpc("fn_vincular_embajador_portal", { p_telefono: data.telefono }, ses.token);
+      if(vin.data && vin.data.ok) acceso = "ok";
+    }else if(ses.pendiente){
+      acceso = "pendiente";
+    }
+    data.acceso = acceso;
+
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(_){}
+    mostrarExito(data);
+  });
+
+  // ---- Activar acceso (para quien confirmó su correo después) ----
+  const fAct = document.getElementById("fAct");
+  fAct.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errA = document.getElementById("errAct"), okA = document.getElementById("okAct"), bA = document.getElementById("btnAct");
+    errA.style.display = "none"; okA.style.display = "none";
+    const tel = document.getElementById("aTel").value.trim();
+    const correo = document.getElementById("aCorreo").value.trim().toLowerCase();
+    const clave = document.getElementById("aClave").value;
+    if(!tel || !correo || !clave){ errA.textContent = "Completa los tres campos."; errA.style.display = "block"; return; }
+    bA.disabled = true; bA.textContent = "Activando...";
+    const r = await authFetch("token?grant_type=password", { email: correo, password: clave });
+    if(!(r.ok && r.j.access_token)){
+      errA.textContent = "No pudimos entrar. Revisa que hayas confirmado tu correo y que la contraseña sea la correcta.";
+      errA.style.display = "block"; bA.disabled = false; bA.textContent = "Activar mi acceso"; return;
+    }
+    const vin = await rpc("fn_vincular_embajador_portal", { p_telefono: tel }, r.j.access_token);
+    bA.disabled = false; bA.textContent = "Activar mi acceso";
+    if(vin.data && vin.data.ok){
+      okA.textContent = "Listo. Ya puedes entrar a tu portal: " + URL_PORTAL;
+      okA.style.display = "block";
+    }else{
+      const m = vin.data && vin.data.error;
+      errA.textContent = m === "ya_tiene_cuenta" ? "Ese registro ya está vinculado a otra cuenta."
+        : m === "no_encontrado" ? "No encontramos un registro vigente con ese WhatsApp y ese correo."
+        : "No pudimos activar tu acceso. Escríbenos por WhatsApp.";
+      errA.style.display = "block";
+    }
+  });
+
+  // ---- Ojito para mostrar/ocultar contraseñas ----
+  (function(){
+    document.querySelectorAll("input[type=password]").forEach(function(inp){
+      var w = document.createElement("span"); w.className = "ojito-wrap";
+      inp.parentNode.insertBefore(w, inp); w.appendChild(inp);
+      var b = document.createElement("button"); b.type = "button"; b.className = "ojito-btn";
+      b.textContent = "👁"; b.setAttribute("aria-label", "Mostrar contraseña");
+      b.onclick = function(){
+        var ver = inp.type === "password";
+        inp.type = ver ? "text" : "password";
+        b.textContent = ver ? "🙈" : "👁";
+        b.setAttribute("aria-label", ver ? "Ocultar contraseña" : "Mostrar contraseña");
+      };
+      w.appendChild(b);
+    });
+  })();
+</script>
+</body>
+</html>
