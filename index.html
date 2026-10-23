@@ -485,8 +485,13 @@
         ocultarFormulario();
         mostrar("sinCupos");
       }else{
-        c.innerHTML = "Quedan <b>" + data.disponibles + "</b> cupos gratuitos de " + data.cupos;
-        c.style.display = "block";
+        const tomados = data.cupos - data.disponibles;
+      if(tomados <= 0){
+      c.innerHTML = "Afiliación gratuita con <b>cupos limitados</b>: solo " + data.cupos + " personas";
+      }else{
+      c.innerHTML = "<b>" + tomados + "</b> de " + data.cupos + " cupos ya fueron tomados · quedan <b>" + data.disponibles + "</b>";
+       }
+       c.style.display = "block";
       }
     }
   })();
