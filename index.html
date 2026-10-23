@@ -297,6 +297,7 @@
       <b>Recuerda:</b> logra al menos una venta antes de esa fecha y tu código será tuyo de forma permanente. Si no, se elimina y el cupo pasa a otra persona.
     </div>
     <p id="notaAcceso" style="margin-top:18px"></p>
+    <p id="notaCorreo" style="display:none;margin-top:10px;font-size:0.9rem;color:#2c4a35"></p>
   </div>
 
   <div class="state" id="sinCupos">
@@ -381,6 +382,25 @@
       return { error: "Ese correo ya tiene una cuenta con otra contraseña." };
     }
     return { error: (r.j.msg || r.j.message || "No pudimos crear tu acceso.") };
+  }
+
+  // Correo de bienvenida: lo envía una función de Supabase directo con Brevo (sin Make).
+  // Si falla o no está configurada, no pasa nada: el código ya se muestra en pantalla.
+  const URL_CORREO = SUPABASE_URL + "/functions/v1/correo-embajador";
+  async function enviarCorreoBienvenida(d){
+    try{
+      const r = await fetch(URL_CORREO, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "apikey": SUPABASE_KEY },
+        body: JSON.stringify({ telefono: d.telefono })
+      });
+      const j = await r.json().catch(() => null);
+      if(j && j.ok){
+        const n = document.getElementById("notaCorreo");
+        n.textContent = "También te enviamos estos datos a " + d.correo + ". Si no lo ves, revisa tu carpeta de spam.";
+        n.style.display = "block";
+      }
+    }catch(_){}
   }
 
   const MENSAJES = {
@@ -525,6 +545,7 @@
 
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(_){}
     mostrarExito(data);
+    enviarCorreoBienvenida(data);
   });
 
   // ---- Activar acceso (para quien confirmó su correo después) ----
