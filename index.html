@@ -315,7 +315,7 @@
     <summary><b>Paso 2 · Activa tu acceso al portal</b> (si ya te registraste y confirmaste tu correo)</summary>
     <form id="fAct" onsubmit="return false" novalidate>
       <div>
-        <label for="aTel">Tu número de WhatsApp</label>
+        <label for="aTel">Tu número de WhatsApp <small>(el mismo que pusiste en el paso 1)</small></label>
         <input type="tel" id="aTel" autocomplete="tel">
       </div>
       <div>
@@ -467,6 +467,8 @@
       pasos.innerHTML = "<b>Paso 1 ✓</b> · Falta el paso 2: activa tu acceso al portal";
       act.style.display = "block";
       act.open = true;
+      document.getElementById("aTel").value = d.telefono ? "0" + String(d.telefono).slice(2) : "";
+      document.getElementById("aCorreo").value = d.correo || "";
     }
     mostrar("ok");
   }
