@@ -195,24 +195,68 @@
   /* ---- Videos + formulario con candado ---- */
   .videos{ display:grid; grid-template-columns:1fr; gap:26px; margin:6px 0 30px; }
   .video-item h2{ font-family:'Fraunces',serif; font-weight:500; font-size:1.3rem; color:var(--moss-900); margin:0 0 10px; }
-  .video-item .marco{ border-radius:6px; overflow:hidden; background:#000; border:1.5px solid var(--line); }
+  .video-item .marco{
+    position:relative;
+    border-radius:22px;
+    overflow:hidden;
+    isolation:isolate;
+    background:#000;
+    border:1.5px solid var(--line);
+    transform:translateZ(0);
+  }
   wistia-player{ display:block; width:100%; }
+
+  /* Candado del 2.º video: se libera al terminar el 1.º */
+  .candado{
+    position:absolute; inset:0; z-index:5;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:8px; padding:20px; text-align:center;
+    background:rgba(31,51,35,.88);
+    color:#fff;
+    backdrop-filter:blur(3px);
+    -webkit-backdrop-filter:blur(3px);
+    cursor:not-allowed;
+  }
+  .candado .ico{ font-size:2.2rem; line-height:1; }
+  .candado p{ margin:0; font-family:'Fraunces',serif; font-size:1.15rem; line-height:1.3; }
+  .candado small{ color:#cfe0d2; font-size:0.85rem; }
+  .candado.hide{ display:none; }
+
   .gate{ background:var(--moss-900); color:#fff; border-radius:6px; padding:26px 22px; text-align:center; margin-bottom:28px; }
   .gate p{ font-family:'Fraunces',serif; font-size:1.45rem; line-height:1.3; margin:0 0 16px; }
   .gate .barra{ height:8px; background:#3c5a45; border-radius:99px; overflow:hidden; max-width:420px; margin:0 auto; }
   .gate .barra i{ display:block; height:100%; width:0%; background:var(--clay); transition:width .4s linear; }
-  .gate button.lnk{ display:none; margin:14px auto 0; padding:6px 10px; background:transparent; color:#cfe0d2; font-size:0.9rem; font-weight:400; text-decoration:underline; }
   .gate.hide{ display:none !important; }
   #zonaForm{ display:none; }
   #zonaForm.abierto{ display:block; animation:abrir .6s ease; }
   @keyframes abrir{ from{ opacity:0; transform:translateY(-12px);} to{ opacity:1; transform:none; } }
+
   @media (min-width:900px){
     .wrap{ max-width:1120px; padding:56px 40px 80px; }
     .videos{ grid-template-columns:1fr 1fr; gap:32px; }
-    .contenido{ max-width:720px; margin:0 auto; }
+    .contenido{ max-width:none; margin:0; }
     h1{ font-size:2.5rem; }
     .sub{ font-size:1.1rem; max-width:720px; }
     .gate p{ font-size:1.7rem; }
+
+    /* Reglas en dos columnas para aprovechar el ancho */
+    .reglas{ padding:24px 28px 12px; }
+    .reglas ul{ display:grid; grid-template-columns:1fr 1fr; gap:6px 40px; }
+
+    /* Formulario a todo el ancho, en dos columnas */
+    #f{ display:grid; grid-template-columns:1fr 1fr; gap:22px 32px; align-items:start; }
+    #f > .fila,
+    #f > .bloque-titulo,
+    #f > .nota,
+    #f > .acepto,
+    #f > .err,
+    #f > button,
+    #f > div:has(#redSocial),
+    #f > div:has(#correo){ grid-column:1 / -1; }
+    #f > .bloque-titulo{ margin:6px 0 -8px; }
+    #f > button{ justify-self:center; min-width:360px; }
+    .state{ max-width:720px; margin-left:auto; margin-right:auto; }
+    .activar{ max-width:720px; margin-left:auto; margin-right:auto; }
   }
 </style>
 <script src="https://fast.wistia.com/player.js" async></script>
@@ -234,20 +278,26 @@
 
   <div class="videos" id="videos">
     <div class="video-item">
-      <h2>Bienvenida al Programa</h2>
+      <h2>1. Bienvenida al Programa</h2>
       <div class="marco"><wistia-player media-id="0ohc799l5f" aspect="1.7777777777777777"></wistia-player></div>
     </div>
     <div class="video-item">
-      <h2>Metodología del programa</h2>
-      <div class="marco"><wistia-player media-id="0ubsfl0u9r" aspect="1.7777777777777777"></wistia-player></div>
+      <h2>2. Metodología del programa</h2>
+      <div class="marco">
+        <wistia-player media-id="0ubsfl0u9r" aspect="1.7777777777777777"></wistia-player>
+        <div class="candado" id="candado2">
+          <div class="ico">🔒</div>
+          <p>Este video se activa cuando termines el primero</p>
+          <small>Míralo completo para continuar</small>
+        </div>
+      </div>
     </div>
   </div>
 
   <div class="contenido">
   <div class="gate" id="gate">
-    <p>Una vez culmines los videos se desplegará el formulario para que crees tu cuenta.</p>
+    <p>Mira los dos videos hasta el final: el formulario para crear tu cuenta se desplegará poco antes de que termine el segundo.</p>
     <div class="barra"><i id="gateBarra"></i></div>
-    <button type="button" class="lnk" id="gateSaltar">¿No te cargan los videos? Mostrar el formulario</button>
   </div>
 
   <div id="zonaForm">
@@ -656,46 +706,57 @@
 </script>
 
 <script>
-  // ---- Candado del formulario: se abre cuando el 2.º video pasa del minuto 1 ----
+  // ---- Videos en orden + candado del formulario ----
+  // 1) El 2.º video se desbloquea cuando termina el 1.º.
+  // 2) El formulario se abre 20 segundos antes de que termine el 2.º.
   (function(){
-    var ID2 = "0ubsfl0u9r", UMBRAL = 60, KEY = "emb_form_visto_v1";
+    var ID1 = "0ohc799l5f", ID2 = "0ubsfl0u9r";
+    var ANTES = 20; // segundos antes del final del 2.º video
+    var KEY = "emb_form_visto_v2", KEY1 = "emb_video1_visto_v2";
     var gate = document.getElementById("gate"), zona = document.getElementById("zonaForm");
-    var barra = document.getElementById("gateBarra"), saltar = document.getElementById("gateSaltar");
+    var barra = document.getElementById("gateBarra"), candado = document.getElementById("candado2");
     var abierto = false, timer = null;
 
+    function desbloquear2(){
+      candado.classList.add("hide");
+      try{ localStorage.setItem(KEY1, "1"); }catch(_){}
+    }
     function abrir(){
       if(abierto) return; abierto = true;
       if(timer) clearInterval(timer);
       try{ localStorage.setItem(KEY, "1"); }catch(_){}
+      desbloquear2();
       gate.classList.add("hide");
       zona.classList.add("abierto");
     }
-    saltar.addEventListener("click", abrir);
 
-    try{ if(localStorage.getItem(KEY)) { abrir(); return; } }catch(_){}
-
-    // Enlace de rescate por si los videos no cargan (aparece a los 25 s)
-    setTimeout(function(){ saltar.style.display = "block"; }, 25000);
+    // Quien ya vio todo antes entra directo
+    try{ if(localStorage.getItem(KEY)){ abrir(); return; } }catch(_){}
+    // Quien ya terminó el 1.º en otra visita: 2.º desbloqueado
+    try{ if(localStorage.getItem(KEY1)) candado.classList.add("hide"); }catch(_){}
 
     function avance(seg, dur){
-      var umbral = (dur && dur > 0) ? Math.min(UMBRAL, Math.max(dur - 5, 5)) : UMBRAL;
+      if(!(dur > 0)) return; // sin duración conocida no se puede calcular
+      var umbral = Math.max(dur - ANTES, 3);
       barra.style.width = Math.min(100, (seg / umbral) * 100) + "%";
       if(seg >= umbral) abrir();
     }
 
     function enganchar(){
-      var p = document.querySelector("wistia-player[media-id='" + ID2 + "']");
-      if(!p) return;
-      p.addEventListener("secondchange", function(e){
-        var s = (e.detail && (e.detail.second != null ? e.detail.second : e.detail.time)); 
-        if(typeof s === "number") avance(s, typeof p.duration === "function" ? p.duration() : 0);
+      var p1 = document.querySelector("wistia-player[media-id='" + ID1 + "']");
+      var p2 = document.querySelector("wistia-player[media-id='" + ID2 + "']");
+      if(p1){ p1.addEventListener("end", desbloquear2); }
+      if(!p2) return;
+      p2.addEventListener("secondchange", function(e){
+        var s = (e.detail && (e.detail.second != null ? e.detail.second : e.detail.time));
+        if(typeof s === "number") avance(s, typeof p2.duration === "function" ? p2.duration() : 0);
       });
-      p.addEventListener("end", abrir);
+      p2.addEventListener("end", abrir);
       timer = setInterval(function(){
         try{
-          if(typeof p.time === "function"){
-            var t = p.time();
-            if(typeof t === "number") avance(t, typeof p.duration === "function" ? p.duration() : 0);
+          if(typeof p2.time === "function"){
+            var t = p2.time();
+            if(typeof t === "number") avance(t, typeof p2.duration === "function" ? p2.duration() : 0);
           }
         }catch(_){}
       }, 700);
@@ -704,7 +765,7 @@
     if(window.customElements && customElements.whenDefined){
       customElements.whenDefined("wistia-player").then(enganchar);
     }
-    // Si Wistia no carga en 12 s (bloqueador, mala señal), abrir para no dejar a nadie fuera
+    // Si Wistia no carga en 12 s (bloqueador, mala señal), abrir todo para no dejar a nadie fuera
     setTimeout(function(){
       if(!(window.customElements && customElements.get("wistia-player"))) abrir();
     }, 12000);
