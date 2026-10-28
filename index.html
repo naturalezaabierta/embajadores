@@ -177,9 +177,6 @@
     font-size:0.9rem;
     color:var(--moss-700);
   }
-  .activar{ margin-top:36px; padding-top:20px; border-top:1px solid var(--line); }
-  .activar summary{ cursor:pointer; color:var(--moss-700); font-size:0.9rem; font-weight:500; }
-  .activar form{ margin-top:16px; }
   footer{
     margin-top:48px;
     padding-top:20px;
@@ -256,7 +253,6 @@
     #f > .bloque-titulo{ margin:6px 0 -8px; }
     #f > button{ justify-self:center; min-width:360px; }
     .state{ max-width:720px; margin-left:auto; margin-right:auto; }
-    .activar{ max-width:720px; margin-left:auto; margin-right:auto; }
   }
 </style>
 <script src="https://fast.wistia.com/player.js" async></script>
@@ -269,7 +265,7 @@
 <div class="wrap">
 
   <img class="logo" src="logo.png" alt="Naturaleza Abierta" onerror="this.onerror=null;this.src='https://www.naturalezaabierta.com/wp-content/uploads/2026/03/cropped-cropped-solo-logo-WEB2.png'">
-  <div class="pasos" id="pasos"><b>Paso 1 de 2</b> · Tus datos</div>
+  <div class="pasos" id="pasos"><b>Registro gratuito</b> · Embajadores</div>
 
   <h1>Te damos la bienvenida a Naturaleza Abierta</h1>
   <p class="sub" id="subP">Deja tus datos para gestionar tu afiliación gratuita como embajador(a) y empezar a compartir nuestros productos.</p>
@@ -409,26 +405,6 @@
     <a class="btn-principal" id="btnPortalYa" href="https://portal.naturalezaabierta.com/" target="_blank" rel="noopener">Ir a mi portal</a>
   </div>
 
-  <details class="activar" id="activar">
-    <summary><b>Paso 2 · Activa tu acceso al portal</b> (si ya te registraste y confirmaste tu correo)</summary>
-    <form id="fAct" onsubmit="return false" novalidate>
-      <div>
-        <label for="aTel">Tu número de WhatsApp <small>(el mismo que pusiste en el paso 1)</small></label>
-        <input type="tel" id="aTel" autocomplete="tel">
-      </div>
-      <div>
-        <label for="aCorreo">Correo con el que te registraste</label>
-        <input type="email" id="aCorreo" autocomplete="email">
-      </div>
-      <div>
-        <label for="aClave">Contraseña</label>
-        <input type="password" id="aClave" autocomplete="current-password">
-      </div>
-      <p class="err" id="errAct"></p>
-      <p class="nota" id="okAct" style="display:none;color:#2c4a35"></p>
-      <button type="submit" id="btnAct" class="sec">Activar mi acceso</button>
-    </form>
-  </details>
 
   </div><!-- /contenido -->
 
@@ -552,26 +528,15 @@
     document.getElementById("linkPortal").href = URL_PORTAL;
     const nota = document.getElementById("notaAcceso");
     if(d.acceso === "ok") nota.textContent = "Entra a tu portal con " + d.correo + " y la contraseña que acabas de crear.";
-    else if(d.acceso === "pendiente") nota.textContent = "Te enviamos un correo para confirmar tu cuenta. Confírmalo y luego completa el paso 2 aquí abajo.";
-    else nota.textContent = "Tu código ya está activo. Para entrar a tu portal, completa el paso 2 aquí abajo para activar tu acceso al portal.";
+    else if(d.acceso === "pendiente") nota.textContent = "Te enviamos un correo a " + d.correo + " para confirmar tu cuenta. Confírmalo y luego entra a tu portal.";
+    else nota.textContent = "Tu código ya está activo. Si no logras entrar a tu portal, escríbenos por WhatsApp y te ayudamos.";
     document.getElementById("btnCopiar").onclick = async () => {
       try{ await navigator.clipboard.writeText(d.link_catalogo); document.getElementById("btnCopiar").textContent = "¡Copiado!"; }
       catch(_){ window.prompt("Copia tu enlace:", d.link_catalogo); }
     };
     const pasos = document.getElementById("pasos");
-    const act = document.getElementById("activar");
-    if(d.acceso === "ok"){
-      pasos.className = "pasos listo";
-      pasos.innerHTML = "<b>Paso 1 ✓ · Paso 2 ✓</b> · Todo listo";
-      act.style.display = "none";
-    }else{
-      pasos.className = "pasos";
-      pasos.innerHTML = "<b>Paso 1 ✓</b> · Falta el paso 2: activa tu acceso al portal";
-      act.style.display = "block";
-      act.open = true;
-      document.getElementById("aTel").value = d.telefono ? "0" + String(d.telefono).slice(2) : "";
-      document.getElementById("aCorreo").value = d.correo || "";
-    }
+    pasos.className = "pasos listo";
+    pasos.innerHTML = "<b>✓ Listo</b> · Tu afiliación está activa";
     mostrar("ok");
   }
 
@@ -633,7 +598,7 @@
         ocultarFormulario();
         document.getElementById("yaRegistradoTexto").textContent = c === "ya_afiliado"
           ? "Ese número ya tiene un código de afiliado. Entra a tu portal para verlo."
-          : "Ese número, cédula o correo ya está registrado como embajador. Entra a tu portal para ver tu código; si no tienes acceso, actívalo abajo.";
+          : "Ese número, cédula o correo ya está registrado como embajador. Entra a tu portal para ver tu código; si no tienes acceso, escríbenos por WhatsApp y te ayudamos.";
         mostrar("yaRegistrado");
         return;
       }
@@ -655,36 +620,6 @@
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(_){}
     mostrarExito(data);
     enviarCorreoBienvenida(data);
-  });
-
-  // ---- Activar acceso (para quien confirmó su correo después) ----
-  const fAct = document.getElementById("fAct");
-  fAct.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const errA = document.getElementById("errAct"), okA = document.getElementById("okAct"), bA = document.getElementById("btnAct");
-    errA.style.display = "none"; okA.style.display = "none";
-    const tel = document.getElementById("aTel").value.trim();
-    const correo = document.getElementById("aCorreo").value.trim().toLowerCase();
-    const clave = document.getElementById("aClave").value;
-    if(!tel || !correo || !clave){ errA.textContent = "Completa los tres campos."; errA.style.display = "block"; return; }
-    bA.disabled = true; bA.textContent = "Activando...";
-    const r = await authFetch("token?grant_type=password", { email: correo, password: clave });
-    if(!(r.ok && r.j.access_token)){
-      errA.textContent = "No pudimos entrar. Revisa que hayas confirmado tu correo y que la contraseña sea la correcta.";
-      errA.style.display = "block"; bA.disabled = false; bA.textContent = "Activar mi acceso"; return;
-    }
-    const vin = await rpc("fn_vincular_embajador_portal", { p_telefono: tel }, r.j.access_token);
-    bA.disabled = false; bA.textContent = "Activar mi acceso";
-    if(vin.data && vin.data.ok){
-      okA.textContent = "Listo. Ya puedes entrar a tu portal: " + URL_PORTAL;
-      okA.style.display = "block";
-    }else{
-      const m = vin.data && vin.data.error;
-      errA.textContent = m === "ya_tiene_cuenta" ? "Ese registro ya está vinculado a otra cuenta."
-        : m === "no_encontrado" ? "No encontramos un registro vigente con ese WhatsApp y ese correo."
-        : "No pudimos activar tu acceso. Escríbenos por WhatsApp.";
-      errA.style.display = "block";
-    }
   });
 
   // ---- Ojito para mostrar/ocultar contraseñas ----
