@@ -191,7 +191,35 @@
   .ojito-wrap>input{padding-right:44px!important}
   .ojito-btn{position:absolute!important;right:6px;top:50%;transform:translateY(-50%);width:34px!important;height:34px;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;cursor:pointer;font-size:17px;line-height:1;opacity:.65;color:inherit}
   .ojito-btn:hover{opacity:1;background:transparent!important}
+
+  /* ---- Videos + formulario con candado ---- */
+  .videos{ display:grid; grid-template-columns:1fr; gap:26px; margin:6px 0 30px; }
+  .video-item h2{ font-family:'Fraunces',serif; font-weight:500; font-size:1.3rem; color:var(--moss-900); margin:0 0 10px; }
+  .video-item .marco{ border-radius:6px; overflow:hidden; background:#000; border:1.5px solid var(--line); }
+  wistia-player{ display:block; width:100%; }
+  .gate{ background:var(--moss-900); color:#fff; border-radius:6px; padding:26px 22px; text-align:center; margin-bottom:28px; }
+  .gate p{ font-family:'Fraunces',serif; font-size:1.45rem; line-height:1.3; margin:0 0 16px; }
+  .gate .barra{ height:8px; background:#3c5a45; border-radius:99px; overflow:hidden; max-width:420px; margin:0 auto; }
+  .gate .barra i{ display:block; height:100%; width:0%; background:var(--clay); transition:width .4s linear; }
+  .gate button.lnk{ display:none; margin:14px auto 0; padding:6px 10px; background:transparent; color:#cfe0d2; font-size:0.9rem; font-weight:400; text-decoration:underline; }
+  .gate.hide{ display:none !important; }
+  #zonaForm{ display:none; }
+  #zonaForm.abierto{ display:block; animation:abrir .6s ease; }
+  @keyframes abrir{ from{ opacity:0; transform:translateY(-12px);} to{ opacity:1; transform:none; } }
+  @media (min-width:900px){
+    .wrap{ max-width:1120px; padding:56px 40px 80px; }
+    .videos{ grid-template-columns:1fr 1fr; gap:32px; }
+    .contenido{ max-width:720px; margin:0 auto; }
+    h1{ font-size:2.5rem; }
+    .sub{ font-size:1.1rem; max-width:720px; }
+    .gate p{ font-size:1.7rem; }
+  }
 </style>
+<script src="https://fast.wistia.com/player.js" async></script>
+<script src="https://fast.wistia.com/embed/0ohc799l5f.js" async type="module"></script>
+<script src="https://fast.wistia.com/embed/0ubsfl0u9r.js" async type="module"></script>
+<style>wistia-player[media-id='0ohc799l5f']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/0ohc799l5f/swatch'); display:block; filter: blur(5px); padding-top:56.25%; }</style>
+<style>wistia-player[media-id='0ubsfl0u9r']:not(:defined) { background: center / contain no-repeat url('https://fast.wistia.com/embed/medias/0ubsfl0u9r/swatch'); display:block; filter: blur(5px); padding-top:56.25%; }</style>
 </head>
 <body>
 <div class="wrap">
@@ -204,6 +232,25 @@
 
   <div class="cupos" id="cupos"></div>
 
+  <div class="videos" id="videos">
+    <div class="video-item">
+      <h2>Bienvenida al Programa</h2>
+      <div class="marco"><wistia-player media-id="0ohc799l5f" aspect="1.7777777777777777"></wistia-player></div>
+    </div>
+    <div class="video-item">
+      <h2>Metodología del programa</h2>
+      <div class="marco"><wistia-player media-id="0ubsfl0u9r" aspect="1.7777777777777777"></wistia-player></div>
+    </div>
+  </div>
+
+  <div class="contenido">
+  <div class="gate" id="gate">
+    <p>Una vez culmines los videos se desplegará el formulario para que crees tu cuenta.</p>
+    <div class="barra"><i id="gateBarra"></i></div>
+    <button type="button" class="lnk" id="gateSaltar">¿No te cargan los videos? Mostrar el formulario</button>
+  </div>
+
+  <div id="zonaForm">
   <div class="reglas" id="reglas">
     <h2>Cómo funciona tu afiliación gratuita</h2>
     <ul>
@@ -274,6 +321,7 @@
     <p class="err" id="err"></p>
     <button type="submit" id="btn">Quiero mi afiliación gratuita</button>
   </form>
+  </div><!-- /zonaForm -->
 
   <div class="state" id="ok">
     <svg class="check" viewBox="0 0 52 52" fill="none">
@@ -331,6 +379,8 @@
       <button type="submit" id="btnAct" class="sec">Activar mi acceso</button>
     </form>
   </details>
+
+  </div><!-- /contenido -->
 
   <footer>Naturaleza Abierta</footer>
 </div>
@@ -427,6 +477,7 @@
     form.classList.add("hide");
     document.getElementById("reglas").classList.add("hide");
     document.getElementById("cupos").classList.add("hide");
+    document.getElementById("gate").classList.add("hide");
   }
   function fallo(msg){
     err.textContent = msg;
@@ -441,6 +492,7 @@
 
   function mostrarExito(d){
     ocultarFormulario();
+    document.getElementById("videos").style.display = "none";
     document.getElementById("subP").style.display = "none";
     document.getElementById("codigoTexto").textContent = d.codigo_propio;
     document.getElementById("vigenciaTexto").textContent = "Válido hasta el " + fechaLarga(d.vence_en) + " (" + d.dias + " días)";
@@ -600,6 +652,62 @@
       };
       w.appendChild(b);
     });
+  })();
+</script>
+
+<script>
+  // ---- Candado del formulario: se abre cuando el 2.º video pasa del minuto 1 ----
+  (function(){
+    var ID2 = "0ubsfl0u9r", UMBRAL = 60, KEY = "emb_form_visto_v1";
+    var gate = document.getElementById("gate"), zona = document.getElementById("zonaForm");
+    var barra = document.getElementById("gateBarra"), saltar = document.getElementById("gateSaltar");
+    var abierto = false, timer = null;
+
+    function abrir(){
+      if(abierto) return; abierto = true;
+      if(timer) clearInterval(timer);
+      try{ localStorage.setItem(KEY, "1"); }catch(_){}
+      gate.classList.add("hide");
+      zona.classList.add("abierto");
+    }
+    saltar.addEventListener("click", abrir);
+
+    try{ if(localStorage.getItem(KEY)) { abrir(); return; } }catch(_){}
+
+    // Enlace de rescate por si los videos no cargan (aparece a los 25 s)
+    setTimeout(function(){ saltar.style.display = "block"; }, 25000);
+
+    function avance(seg, dur){
+      var umbral = (dur && dur > 0) ? Math.min(UMBRAL, Math.max(dur - 5, 5)) : UMBRAL;
+      barra.style.width = Math.min(100, (seg / umbral) * 100) + "%";
+      if(seg >= umbral) abrir();
+    }
+
+    function enganchar(){
+      var p = document.querySelector("wistia-player[media-id='" + ID2 + "']");
+      if(!p) return;
+      p.addEventListener("secondchange", function(e){
+        var s = (e.detail && (e.detail.second != null ? e.detail.second : e.detail.time)); 
+        if(typeof s === "number") avance(s, typeof p.duration === "function" ? p.duration() : 0);
+      });
+      p.addEventListener("end", abrir);
+      timer = setInterval(function(){
+        try{
+          if(typeof p.time === "function"){
+            var t = p.time();
+            if(typeof t === "number") avance(t, typeof p.duration === "function" ? p.duration() : 0);
+          }
+        }catch(_){}
+      }, 700);
+    }
+
+    if(window.customElements && customElements.whenDefined){
+      customElements.whenDefined("wistia-player").then(enganchar);
+    }
+    // Si Wistia no carga en 12 s (bloqueador, mala señal), abrir para no dejar a nadie fuera
+    setTimeout(function(){
+      if(!(window.customElements && customElements.get("wistia-player"))) abrir();
+    }, 12000);
   })();
 </script>
 </body>
