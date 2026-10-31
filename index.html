@@ -542,10 +542,9 @@
 
   // ---- Estado inicial: cupos y registro previo en este navegador ----
   (async function init(){
-    try{
-      const g = localStorage.getItem(STORAGE_KEY);
-      if(g){ mostrarExito(JSON.parse(g)); return; }
-    }catch(_){}
+    // Ya no se muestra el registro guardado en el navegador: si el registro se borró
+    // en Supabase, la página debe abrir limpia. Se elimina cualquier dato viejo guardado.
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(_){}
     const { data } = await rpc("fn_embajadores_cupos", {});
     if(data){
       document.querySelectorAll(".dias").forEach(e => e.textContent = data.dias);
@@ -617,7 +616,6 @@
     }
     data.acceso = acceso;
 
-    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(_){}
     mostrarExito(data);
     enviarCorreoBienvenida(data);
   });
